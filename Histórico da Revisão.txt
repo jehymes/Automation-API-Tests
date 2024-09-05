@@ -1,0 +1,197 @@
+Histórico da Revisão
+
+Data            |   Versão   |                     Descrição                    |      Autor       |
+----------------------------------------------------------------------------------------------------
+09/09/2021	|   1.0.0    | Avaliação do teste do protótipo de arquitetura	| Jehymeson Gil    |
+ 
+ 
+Resumo da Avaliação de Testes da Simulação de Crédito API
+
+1.Introdução:
+    1.1 Objetivo:
+        Este Relatório de Avaliação do Teste descreve os resultados dos testes da Simulação de Crédito API em termos de entrada e saída de dados (Tanto para inputs dos endpoints
+        quanto para seus outputs) e análise de defeitos.
+    1.2 Os testes conduzidos estão descritos no Plano de Teste para Simulação de Crédito API [5]. Este Relatório de Avaliação deve ser utilizado para o seguinte:
+        * avaliar a capacidade de aceitação e apropriação do(s) comportamento(s) de desempenho da API
+        * avaliar a capacidade de aceitação dos testes
+        * identificar aprimoramentos para aumentar a sua qualidade
+ 
+2. Resumo de Resultados de Testes:
+
+    Os casos de teste definidos no Conjunto de Teste para a Simulação de Crédito API foram executados seguindo a estratégia de teste definida pelo cliente através de uma PDF 
+    contendo os requisitos a serem testados.
+
+    A Cobertura de teste (consulte a seção 3.0 a seguir) em termos de cobertura dos endpoints de uso e requisitos de teste definidos foi concluída.
+
+    A análise dos defeitos (conforme mostrado na seção 4.0 a seguir) indica que há problemas significativos de respostas(outputs) ao acessar alguns endpoints da API.
+    Foi feito um levantamento para avaliar adicionalmente esses resultados de teste e determinar alternativas nas resoluções. 
+
+3. Cobertura do Teste:
+    Os testes a serem executados na API estão definidos na seção 3.5 deste tópico, juntamente com seus critérios de conclusão. 
+
+    3.1 Path Coverage (Input): 
+        Quantidade de endpoints testados / Quantidade de endpoints da API 
+        4/4 = 1 = 100%
+
+    3.2 Parameter Coverage (input): 
+        Quantidade de parâmetros de cada endpoint testado na API / Quantidade de parâmetros totais de cada operação da API 
+        6/6 = 1 = 100%
+
+    3.3 Response Property Body Coverage (output):
+        Quantidade de propriedades da resposta que os testes estão cobrindo / Número total de todas as propriedades de todos os objetos que pode ser obtido na resposta da API
+        4/6 = 0,66 = 66,6%
+    
+    3.4 Status Code Coverage (output):
+        Quantidade de status code de cada endpoint cobertos pelos testes / Quantidade total de satatus code em cada endpoint da API
+        12/12 = 1 = 100%
+
+    Critérios de conclusão:
+
+    Restrições:
+        Endpoint: GET <host>/api/v1/restricoes/{cpf}
+            * Se não possui restrição do HTTP Status 204 é retornado
+            * Se possui restrição o HTTP Status 200 é retornado com a mensagem "O CPF99999999999 possui restrição"
+    Simulações:
+        Endpoint: POST <host>/api/v1/simulacoes
+            * Uma simulação cadastrada com sucesso retorna o HTTP Status 201 e os dados inseridos como retorno
+            * Uma simulação com problema em alguma regra retorna o HTTP Status 400 com a lista de erros
+            * Uma simulação para um mesmo CPF retorna um HTTP Status 409 com a mensagem "CPF já existente"
+        Endpoint: PUT <host>/api/v1/simulacoes/{cpf}
+            * A alteração pode ser feita em qualquer atributo da simulação
+            * As mesmas regras se mantém
+            * Se o CPF não possuir uma simulação o HTTP Status 404 é retornado com a mensagem "CPF não encontrado"
+        Endpoint: GET <host>/api/v1/simulacoes
+            * Retorna a lista de simulações cadastradas se existir uma ou mais
+            * Retorna HTTP Status 204 se não existir simulações cadastradas
+        Endpoint: GET <host>/api/v1/simulacoes/{cpf}
+            * Retorna a simulação cadastrada
+            * Se o CPF não possuir uma simulação o HTTP Status 404 é retornado
+        Endpoint: DELETE <host>/api/v1/simulacoes/{id}
+            * Retorna o HTTP Status 204 se simulação for removida com sucesso
+            * Retorna o HTTP Status 404 com a mensagem "Simulação não encontrada" se não existir a simulação pelo ID informado
+
+4. Análise de Defeitos:
+    Esta seção resume os resultados da análise de defeitos e recomenda ações para tratar as descobertas.
+    
+    A aplicação possuí falhas em alguns retornos de status code, sendo preciso a correação dos mesmos dentro da API e documentação do Swagger.
+
+    4.1 Defeitos:
+
+        4.1.1 Restrições:
+            Endpoint: GET <host>/api/v1/restricoes/{cpf}
+            Obs.: Não houve retorno de mensagem ao pesquisar por CPF com restrição.
+
+        4.1.2 Simulações:
+            Endpoint: POST <host>/api/v1/simulacoes
+            * Uma simulação para um mesmo CPF retorna um HTTP Status 409 com a mensagem "CPF já existente"
+                Obs.: O valor de mensagem esperado é diferente do descrito na documentação.
+            Endpoint: PUT <host>/api/v1/simulacoes/{cpf}
+            * A alteração pode ser feita em qualquer atributo da simulação
+                Obs.: O campo valor não é alterado quando feito o pedido pelo endpoint.
+            Endpoint: PUT <host>/api/v1/simulacoes/{cpf}
+            * Se o CPF não possuir uma simulação o HTTP Status 404 é retornado com a mensagem "CPF não encontrado"
+                Obs.: A mensagem de retorno é diferente da descrita na documentação.
+            Endpoint: GET <host>/api/v1/simulacoes
+            * Retorna HTTP Status 204 se não existir simulações cadastradas
+                Obs.: O status code retorna 200 em vez de 204
+            Endpoint: DELETE <host>/api/v1/simulacoes/{id}
+            * Retorna o HTTP Status 404 com a mensagem "Simulação não encontrada" se não existir a simulação pelo ID informado
+                Obs.: O status code retorna 200 em vez de 404 e não há retorno de mensagem
+
+    4.2 Ações para tratamento:
+
+        4.2.1 Restrições:
+            Endpoint: GET <host>/api/v1/restricoes/{cpf}
+            Obs.: Verificar validações em headers para o retorno da mensagem dentro da API.
+
+        4.2.2 Simulações:
+            Endpoint: POST <host>/api/v1/simulacoes
+            * Uma simulação para um mesmo CPF retorna um HTTP Status 409 com a mensagem "CPF já existente"
+                Obs.: Fazer correção da mensagem dentro da API.
+             Endpoint: PUT <host>/api/v1/simulacoes/{cpf}
+            * A alteração pode ser feita em qualquer atributo da simulação
+                Obs.: Verificar dentro da API a alteração do campo valor através dos parametros de requisição.
+            Endpoint: PUT <host>/api/v1/simulacoes/{cpf}
+            * Se o CPF não possuir uma simulação o HTTP Status 404 é retornado com a mensagem "CPF não encontrado"
+                Obs.: Fazer correção da mensagem dentro da API.
+            Endpoint: GET <host>/api/v1/simulacoes
+                * Retorna HTTP Status 204 se não existir simulações cadastradas
+                Obs.: Fazer a troca do status code de retorno dentro da API
+            Endpoint: DELETE <host>/api/v1/simulacoes/{id}
+            * Retorna o HTTP Status 404 com a mensagem "Simulação não encontrada" se não existir a simulação pelo ID informado
+                Obs.: Fazer a troca do status code de retorno dentro da API e retornar a mensagem descrita na documentação
+
+5. Plano de Teste para Simulação de Crédito API:
+
+    5.2 Log de execução:
+        @Restricoes
+        Cenario: Consultar uma restricao pelo CPF - Com Restricao                                          # src/test/java/features/controller/RestricoesController.feature:8
+        Quando eu consulto pelo cpf "97093236014" em /restricoes/                                          # steps.controller.RestricoesStepsDefinitions.euConsultoPeloCPF(java.lang.String,java.lang.String)
+        Entao espero receber o codigo 200 da restricao                                                     # steps.controller.RestricoesStepsDefinitions.esperoReceberCodigo200()
+
+        @Restricoes
+        Cenario: Consultar uma restricao pelo CPF - Sem Restricao                                          # src/test/java/features/controller/RestricoesController.feature:12
+        Quando eu consulto pelo cpf "99999999999" em /restricoes/                                          # steps.controller.RestricoesStepsDefinitions.euConsultoPeloCPF(java.lang.String,java.lang.String)
+        Entao espero receber o codigo 204 da restricao                                                     # steps.controller.RestricoesStepsDefinitions.esperoReceberCodigo204()
+
+        @Simulacoes
+        Cenario: Criar uma simulacao - Gravação com SUCESSO                                                # src/test/java/features/controller/SimulacaoController.feature:9
+        Quando eu faço um POST para /simulacoes/ com os seguintes valores:                                 # steps.controller.SimulacaoStepsDefinitions.inserirNovaSimulacao(java.lang.String,java.util.Map<java.lang.String, java.lang.String>)
+        Entao espero receber o codigo 201                                                                  # steps.controller.SimulacaoStepsDefinitions.esperoReceberCodigo201()
+
+        @Simulacoes
+        Cenario: Criar uma simulacao - CPF existente                                                       # src/test/java/features/controller/SimulacaoController.feature:20
+        Quando eu faço um POST para /simulacoes/ com os seguintes valores:                                 # steps.controller.SimulacaoStepsDefinitions.inserirNovaSimulacao(java.lang.String,java.util.Map<java.lang.String, java.lang.String>)
+        Entao espero receber o codigo 409 com a mensagem "CPF duplicado"                                   # steps.controller.SimulacaoStepsDefinitions.esperoReceberCodigo409(java.lang.String)
+
+        @Simulacoes
+        Cenario: Criar uma simulacao - Campo Valor invalido                                                # src/test/java/features/controller/SimulacaoController.feature:30
+        Quando eu faço um POST para /simulacoes/ com os seguintes valores:                                 # steps.controller.SimulacaoStepsDefinitions.inserirNovaSimulacao(java.lang.String,java.util.Map<java.lang.String, java.lang.String>)
+        Entao espero receber o codigo 400 e a mensagem de erro "Valor deve ser menor ou igual a R$ 40.000" # steps.controller.SimulacaoStepsDefinitions.esperoReceberCodigo400(java.lang.String)
+
+        @Simulacoes
+        Cenario: Criar uma simulacao - Campos vazios                                                       # src/test/java/features/controller/SimulacaoController.feature:40
+        Quando eu faço um POST para /simulacoes/ com os seguintes valores:                                 # steps.controller.SimulacaoStepsDefinitions.inserirNovaSimulacao(java.lang.String,java.util.Map<java.lang.String, java.lang.String>)
+        Entao espero receber o codigo 400 com os seguintes erros:                                          # steps.controller.SimulacaoStepsDefinitions.esperoReceberCodigo400Erros(java.util.Map<java.lang.String, java.lang.String>)
+
+        @Simulacoes
+        Cenario: Alterar simulacao                                                                         # src/test/java/features/controller/SimulacaoController.feature:50
+        Quando eu faço um PUT para /simulacoes/ com os seguintes valores:                                  # steps.controller.SimulacaoStepsDefinitions.alterarSimulacao(java.lang.String,java.util.Map<java.lang.String, java.lang.String>)
+        Entao espero receber o codigo 200 da simulacao                                                     # steps.controller.SimulacaoStepsDefinitions.esperoReceberCodigo200()
+
+        @Simulacoes
+        Cenario: Alterar uma simulacao - CPF não encontrado                                                # src/test/java/features/controller/SimulacaoController.feature:61
+        Quando eu faço um PUT para /simulacoes/ com os seguintes valores:                                  # steps.controller.SimulacaoStepsDefinitions.alterarSimulacao(java.lang.String,java.util.Map<java.lang.String, java.lang.String>)
+        Entao espero receber o codigo 404 e a mensagem de erro "CPF 12345678914 não encontrado"            # steps.controller.SimulacaoStepsDefinitions.esperoReceberCodigo404Erro(java.lang.String)
+
+        @Simulacoes
+        Cenario: Consultar todas as simulacao cadastradas - Com retorno                                    # src/test/java/features/controller/SimulacaoController.feature:71
+        Quando eu faço um GET para /simulacoes/                                                            # steps.controller.SimulacaoStepsDefinitions.listarSimulacoes(java.lang.String)
+        Entao espero receber o codigo 200 com as simulacoes cadastradas                                    # steps.controller.SimulacaoStepsDefinitions.esperoReceberCodigo200ComSimulacoesCadastradas()
+
+        @Simulacoes
+        Cenario: Consultar uma simulacao pelo CPF - Com retorno                                            # src/test/java/features/controller/SimulacaoController.feature:75
+        Quando eu faço um GET para /simulacoes/12345678915                                                 # steps.controller.SimulacaoStepsDefinitions.listarSimulacoes(java.lang.String)
+        Entao espero receber o codigo 200 com a solicitacao cadastrada:                                    # steps.controller.SimulacaoStepsDefinitions.esperoReceberCodigo200ComRetorno(java.util.Map<java.lang.String, java.lang.String>)
+
+        @Simulacoes
+        Cenario: Consultar uma simulacao pelo CPF - Sem retorno                                            # src/test/java/features/controller/SimulacaoController.feature:85
+        Quando eu faço um GET para /simulacoes/17822386035                                                 # steps.controller.SimulacaoStepsDefinitions.listarSimulacoes(java.lang.String)
+        Entao espero receber o codigo 404 e a mensagem de erro "CPF 17822386035 não encontrado"            # steps.controller.SimulacaoStepsDefinitions.esperoReceberCodigo404Erro(java.lang.String)
+
+        @Simulacoes
+        Cenario: Remover uma simulacao - Removida com sucesso                                              # src/test/java/features/controller/SimulacaoController.feature:90
+        Quando eu faço um DELETE para /simulacoes/12                                                       # steps.controller.SimulacaoStepsDefinitions.deletarSimulacao(java.lang.String)
+        Entao espero receber o codigo 200 da simulacao                                                     # steps.controller.SimulacaoStepsDefinitions.esperoReceberCodigo200()
+
+        @Simulacoes
+        Cenario: Remover todas simulacoes                                                                  # src/test/java/features/controller/SimulacaoController.feature:94
+        Quando eu faço um DELETE para todas /simulacoes/                                                   # steps.controller.SimulacaoStepsDefinitions.deletarTodasSimulacoes(java.lang.String)
+        Entao espero receber o codigo 200 da simulacao                                                     # steps.controller.SimulacaoStepsDefinitions.esperoReceberCodigo200()
+
+        @Simulacoes
+        Cenario: Consultar todas as simulacao cadastradas - Sem retorno                                    # src/test/java/features/controller/SimulacaoController.feature:99
+        Quando eu faço um GET para /simulacoes/                                                            # steps.controller.SimulacaoStepsDefinitions.listarSimulacoes(java.lang.String)
+        Entao espero receber o codigo 204 sem as simulacoes cadastradas                                    # steps.controller.SimulacaoStepsDefinitions.esperoReceberCodigo204SemSimulacoes()
+
+    
