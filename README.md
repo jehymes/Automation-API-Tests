@@ -1,4 +1,4 @@
-# **SICREDI Automação API**
+# **Automação API Tests**
 
 Projeto de automação de API desenvolvido para treinamento de habilidades e técnicas.
 
