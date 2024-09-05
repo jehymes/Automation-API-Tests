@@ -53,7 +53,8 @@ Maven
 
 Crie uma copia do projeto em seu ambiente de desenvolvimento utilizando o Git com um dos comandos abaixo:
 ``` 
-**caminhos aqui**
+https://github.com/jehymes/Automation-API-Tests.git
+https://github.com/jehymes/Automation-Performance-Tests.git
 ```
 
 Acesse a pasta do projeto e execute os comandos a seguir:
